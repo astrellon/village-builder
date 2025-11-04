@@ -31,7 +31,7 @@ mesh = SubResource("TorusMesh_0xm2m")
 transform = Transform3D(0.7809989, -0.23796958, 0.5774178, 0, 0.92456007, 0.38103637, -0.62453246, -0.29758897, 0.7220804, 1.9839792, 1.3092223, 2.4810328)
 script = ExtResource("2_0xm2m")
 DEFAULT_DISTANCE = 10.0
-ROTATE_SPEED = 5.0
+ROTATE_SPEED = 1.0
 ANCHOR_NODE_PATH = NodePath("..")
 metadata/_custom_type_script = "uid://chiddhi236pwg"
 

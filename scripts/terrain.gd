@@ -6,18 +6,7 @@ const TILE_SIZE: float = 1.0
 @export var texture_tile_count = Vector2i(8, 4)
 @export var texture_tile_size = Vector2i(16, 16)
 
-class TempMesh:
-	var verts: PackedVector3Array
-	var uvs: PackedVector2Array
-	var normals: PackedVector3Array
-	var indices: PackedInt32Array
-	
-	@warning_ignore("shadowed_variable")
-	func _init(verts: PackedVector3Array, uvs: PackedVector2Array, normals: PackedVector3Array, indices: PackedInt32Array) -> void:
-		self.verts = verts
-		self.uvs = uvs
-		self.normals = normals
-		self.indices = indices
+var rand = FastNoiseLite.new()
 
 func create_terrain() -> TerrainData:
 	const size = 8
@@ -27,10 +16,16 @@ func create_terrain() -> TerrainData:
 	var index = 0
 	for y in range(size):
 		for x in range(size):
-			var height = x * 0.2 + y
-			var type = x % 3
+			var n = (rand.get_noise_2d(x * 10, y * 10) + 1.0) / 2.0
+			var base_height = n * 4.0
+			var type = fmod(n * 100.0, 3.0)
 			
-			var tile = TerrainTileData.new(int(type), Vector4(height + 0.2, height, height, height + 0.2))
+			var height1 = base_height
+			var height2 = base_height + rand.get_noise_2d(x + 0.5, y)
+			var height3 = base_height + rand.get_noise_2d(x, y + 0.5)
+			var height4 = base_height + rand.get_noise_2d(x + 0.5, y + 0.5)
+			
+			var tile = TerrainTileData.new(int(type), Vector4(height1, height2, height3, height4))
 			
 			result[index] = tile
 			index += 1
@@ -116,7 +111,6 @@ static func create_cliff(temp_mesh: TempMesh, tri_index: int, dx: float, dy: flo
 
 func _ready() -> void:
 	var terrain = create_terrain()
-	var rand = FastNoiseLite.new()
 	
 	var mi = MeshInstance3D.new()
 	self.add_child(mi)
@@ -179,40 +173,9 @@ func _ready() -> void:
 			dy = to_up.heights.z - heights.x
 			tri_index = create_cliff(temp_mesh, tri_index, dx, dy, Vector3.BACK, p2, p1, to_up.heights.w, to_up.heights.z, uv_size, uv_x)
 			
-			dx = to_down.heights.y - heights.x
-			dy = to_down.heights.x - heights.y
-			tri_index = create_cliff(temp_mesh, tri_index, dx, dy, Vector3.BACK, p3, p4, to_down.heights.y, to_down.heights.x, uv_size, uv_x)
-			
-			#if dx < 0 || dy < 0:
-				#var b1 = Vector3(p1.x, to_left.heights.y * TILE_SIZE, p1.z)
-				#var b2 = Vector3(p3.x, to_left.heights.w * TILE_SIZE, p3.z)
-				#
-				#uv1 = Vector2(uv_x, p1.y * uv_size.y)
-				#uv2 = Vector2(uv_x + uv_size.x, p3.y * uv_size.y)
-				#uv3 = Vector2(uv_x, b1.y * uv_size.y)
-				#uv4 = Vector2(uv_x + uv_size.x, b2.y * uv_size.y)
-				#
-				#if dx < 0 && dy < 0:
-					#append_quad_vec3(verts, p1, p3, b1, b2)
-					#append_quad_vec2(uvs, uv1, uv2, uv3, uv4)
-					#
-					#for __ in range(6): normals.append(Vector3.LEFT)
-					#
-					#tri_index = add_indicies(indices, tri_index, 6)
-				#elif dx < 0:
-					#append_tri_vec3(verts, p1, p3, b1)
-					#append_tri_vec2(uvs, uv1, uv2, uv3)
-					#
-					#for __ in range(3): normals.append(Vector3.LEFT)
-					#
-					#tri_index = add_indicies(indices, tri_index, 3)
-				#elif dy < 0:
-					#append_tri_vec3(verts, p3, b2, b1)
-					#append_tri_vec2(uvs, uv2, uv4, uv3)
-					#
-					#for __ in range(3): normals.append(Vector3.LEFT)
-					#
-					#tri_index = add_indicies(indices, tri_index, 3)
+			dx = to_down.heights.x - heights.z
+			dy = to_down.heights.y - heights.w
+			tri_index = create_cliff(temp_mesh, tri_index, dx, dy, Vector3.FORWARD, p3, p4, to_down.heights.x, to_down.heights.y, uv_size, uv_x)
 	
 	var surface_array = []
 	surface_array.resize(Mesh.ARRAY_MAX)
@@ -225,5 +188,7 @@ func _ready() -> void:
 	var array_mesh = ArrayMesh.new()
 	array_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, surface_array)
 	array_mesh.surface_set_material(0, self.material)
+	
+	print("Mesh created: faces %d verts %d" % [tri_index / 3.0, tri_index])
 	
 	mi.mesh = array_mesh
