@@ -1,0 +1,39 @@
+[gd_scene load_steps=7 format=3 uid="uid://l388sbifpguy"]
+
+[ext_resource type="Script" uid="uid://c5o1t8ltf3bxh" path="res://scripts/terrain.gd" id="1_ig7tw"]
+[ext_resource type="Script" uid="uid://chiddhi236pwg" path="res://addons/orbit_camera/orbit_camera.gd" id="2_0xm2m"]
+[ext_resource type="Texture2D" uid="uid://b3vuef37o3int" path="res://textures/textureAtlas.png" id="2_h2yge"]
+[ext_resource type="Script" uid="uid://cmn1kiv4rybeu" path="res://scripts/debug.gd" id="4_1bvp3"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0xm2m"]
+albedo_texture = ExtResource("2_h2yge")
+texture_filter = 2
+
+[sub_resource type="TorusMesh" id="TorusMesh_0xm2m"]
+
+[node name="Main" type="Node3D"]
+
+[node name="Terrain" type="Node3D" parent="."]
+script = ExtResource("1_ig7tw")
+material = SubResource("StandardMaterial3D_0xm2m")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.16730219, -0.58064175, 0.7967842, 0, 0.8081749, 0.5889425, -0.98590565, 0.09853137, -0.13520943, 0, 0, 0)
+shadow_enabled = true
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5730832, 0)
+mesh = SubResource("TorusMesh_0xm2m")
+
+[node name="CameraTarget" type="Node3D" parent="."]
+
+[node name="OrbitCamera" type="Camera3D" parent="CameraTarget"]
+transform = Transform3D(0.7809989, -0.23796958, 0.5774178, 0, 0.92456007, 0.38103637, -0.62453246, -0.29758897, 0.7220804, 1.9839792, 1.3092223, 2.4810328)
+script = ExtResource("2_0xm2m")
+DEFAULT_DISTANCE = 10.0
+ROTATE_SPEED = 5.0
+ANCHOR_NODE_PATH = NodePath("..")
+metadata/_custom_type_script = "uid://chiddhi236pwg"
+
+[node name="Debug" type="Node3D" parent="."]
+script = ExtResource("4_1bvp3")
