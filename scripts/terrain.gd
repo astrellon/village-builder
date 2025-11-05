@@ -5,25 +5,38 @@ const TILE_SIZE: float = 1.0
 @export var material: Material
 @export var texture_tile_count = Vector2i(8, 4)
 @export var texture_tile_size = Vector2i(16, 16)
+@export var height_map: Image
 
 var rand = FastNoiseLite.new()
 
+func calc_height_at(x: float, y: float) -> float:
+	#var heightx = x * 0.5 - 2
+	#var heighty = y * 0.5 - 2
+	#return clampf(max(heightx, heighty), 0, 1)
+	@warning_ignore("narrowing_conversion")
+	var colour = self.height_map.get_pixel(x, y)
+	return colour.r * 5.0
+
 func create_terrain() -> TerrainData:
-	const size = 8
+	const size = 64
 	var result: Array[TerrainTileData] = []
 	result.resize(size * size)
 	
 	var index = 0
 	for y in range(size):
 		for x in range(size):
-			var n = (rand.get_noise_2d(x * 10, y * 10) + 1.0) / 2.0
-			var base_height = n * 4.0
-			var type = fmod(n * 100.0, 3.0)
+			#var n = (rand.get_noise_2d(x * 10, y * 10) + 1.0) / 2.0
+			#var base_height = n * 4.0
+			var type = fmod(x * 100.0, 3.0)
 			
-			var height1 = base_height
-			var height2 = base_height + rand.get_noise_2d(x + 0.5, y)
-			var height3 = base_height + rand.get_noise_2d(x, y + 0.5)
-			var height4 = base_height + rand.get_noise_2d(x + 0.5, y + 0.5)
+			#var height1 = base_height
+			#var height2 = base_height + rand.get_noise_2d(x + 0.5, y)
+			#var height3 = base_height + rand.get_noise_2d(x, y + 0.5)
+			#var height4 = base_height + rand.get_noise_2d(x + 0.5, y + 0.5)
+			var height1 = self.calc_height_at(x, y)
+			var height2 = self.calc_height_at(x + 1, y)
+			var height3 = self.calc_height_at(x, y + 1)
+			var height4 = self.calc_height_at(x + 1, y + 1)
 			
 			var tile = TerrainTileData.new(int(type), Vector4(height1, height2, height3, height4))
 			

@@ -1,8 +1,9 @@
-[gd_scene load_steps=7 format=3 uid="uid://l388sbifpguy"]
+[gd_scene load_steps=8 format=3 uid="uid://l388sbifpguy"]
 
 [ext_resource type="Script" uid="uid://c5o1t8ltf3bxh" path="res://scripts/terrain.gd" id="1_ig7tw"]
 [ext_resource type="Script" uid="uid://chiddhi236pwg" path="res://addons/orbit_camera/orbit_camera.gd" id="2_0xm2m"]
 [ext_resource type="Texture2D" uid="uid://b3vuef37o3int" path="res://textures/textureAtlas.png" id="2_h2yge"]
+[ext_resource type="Image" uid="uid://j048urcnkgpk" path="res://textures/test-level1.png" id="3_lquwl"]
 [ext_resource type="Script" uid="uid://cmn1kiv4rybeu" path="res://scripts/debug.gd" id="4_1bvp3"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0xm2m"]
@@ -16,6 +17,7 @@ texture_filter = 2
 [node name="Terrain" type="Node3D" parent="."]
 script = ExtResource("1_ig7tw")
 material = SubResource("StandardMaterial3D_0xm2m")
+height_map = ExtResource("3_lquwl")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(-0.16730219, -0.58064175, 0.7967842, 0, 0.8081749, 0.5889425, -0.98590565, 0.09853137, -0.13520943, 0, 0, 0)
