@@ -38,7 +38,9 @@ func create_terrain() -> TerrainData:
 			var height3 = self.calc_height_at(x, y + 1)
 			var height4 = self.calc_height_at(x + 1, y + 1)
 			
-			var tile = TerrainTileData.new(int(type), Vector4(height1, height2, height3, height4))
+			var flip_orientation = index % 2 == 0
+			
+			var tile = TerrainTileData.new(int(type), flip_orientation, Vector4(height1, height2, height3, height4))
 			
 			result[index] = tile
 			index += 1
@@ -56,14 +58,23 @@ static func append_tri_vec3(list: PackedVector3Array, v1: Vector3, v2: Vector3, 
 	list.append(v2)
 	list.append(v3)
 
-static func append_quad_vec3(list: PackedVector3Array, v1: Vector3, v2: Vector3, v3: Vector3, v4: Vector3) -> void:
-	list.append(v1)
-	list.append(v2)
-	list.append(v3)
-	
-	list.append(v2)
-	list.append(v4)
-	list.append(v3)
+static func append_quad_vec3(list: PackedVector3Array, flipped: bool, v1: Vector3, v2: Vector3, v3: Vector3, v4: Vector3) -> void:
+	if flipped:
+		list.append(v1)
+		list.append(v2)
+		list.append(v4)
+
+		list.append(v1)
+		list.append(v4)
+		list.append(v3)
+	else:
+		list.append(v1)
+		list.append(v2)
+		list.append(v3)
+		
+		list.append(v2)
+		list.append(v4)
+		list.append(v3)
 
 static func append_quad_normals(list: PackedVector3Array, n1: Vector3, n2: Vector3) -> void:
 	list.append(n1)
@@ -99,7 +110,7 @@ static func create_cliff(temp_mesh: TempMesh, tri_index: int, dx: float, dy: flo
 		var uv4 = Vector2(uv_x + uv_size.x, b2.y * uv_size.y)
 		
 		if dx < 0 && dy < 0:
-			append_quad_vec3(temp_mesh.verts, p1, p2, b1, b2)
+			append_quad_vec3(temp_mesh.verts, false, p1, p2, b1, b2)
 			append_quad_vec2(temp_mesh.uvs, uv1, uv2, uv3, uv4)
 			
 			for __ in range(6): temp_mesh.normals.append(normal)
@@ -152,7 +163,7 @@ func _ready() -> void:
 			var p2 = Vector3(px + TILE_SIZE, heights.y * TILE_SIZE, py)
 			var p3 = Vector3(px, heights.z * TILE_SIZE, py + TILE_SIZE)
 			var p4 = Vector3(px + TILE_SIZE, heights.w * TILE_SIZE, py + TILE_SIZE)
-			append_quad_vec3(verts, p1, p2, p3, p4)
+			append_quad_vec3(verts, tile.flip_orientation, p1, p2, p3, p4)
 			
 			var uv_x = float(tile.type % self.texture_tile_count.x) * uv_size.x
 			var uv_y = floor(rand.get_noise_2d(x, y) * self.texture_tile_size.y * (self.texture_tile_count.y - 1)) * uv_size.y
@@ -163,9 +174,14 @@ func _ready() -> void:
 			var uv4 = uv1 + uv_size
 			append_quad_vec2(uvs, uv1, uv2, uv3, uv4)
 			
-			var normal1 = ((p3 - p2).cross(p2 - p1)).normalized()
-			var normal2 = ((p3 - p4).cross(p4 - p2)).normalized()
-			append_quad_normals(normals, normal1, normal2)
+			if tile.flip_orientation:
+				var normal1 = ((p4 - p2).cross(p2 - p1)).normalized()
+				var normal2 = ((p3 - p4).cross(p4 - p1)).normalized()
+				append_quad_normals(normals, normal1, normal2)
+			else:
+				var normal1 = ((p3 - p2).cross(p2 - p1)).normalized()
+				var normal2 = ((p3 - p4).cross(p4 - p2)).normalized()
+				append_quad_normals(normals, normal1, normal2)
 			
 			tri_index = add_indicies(indices, tri_index, 6)
 			
