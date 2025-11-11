@@ -1,0 +1,272 @@
+[gd_scene load_steps=14 format=3 uid="uid://b7i3lv0jn1m5s"]
+
+[ext_resource type="Script" uid="uid://m48iq7mstqvk" path="res://scripts/debug_draw.gd" id="1_0xm2m"]
+[ext_resource type="CompressedTexture2DArray" uid="uid://26cdamu4qjig" path="res://textures/textures.png" id="3_1bvp3"]
+[ext_resource type="Script" uid="uid://chiddhi236pwg" path="res://addons/orbit_camera/orbit_camera.gd" id="3_h2yge"]
+
+[sub_resource type="TorusMesh" id="TorusMesh_ig7tw"]
+
+[sub_resource type="Curve" id="Curve_0xm2m"]
+_limits = [-1.0, 1.0, 0.0, 1.0]
+_data = [Vector2(0, -1), 0.0, 1.9786057, 0, 1, Vector2(0.4937656, -0.023032546), -100000.0, -100000.0, 0, 0, Vector2(1, 1), 2.0208673, 0.0, 1, 0]
+point_count = 3
+
+[sub_resource type="FastNoise2" id="FastNoise2_0xm2m"]
+period = 226.5001
+fractal_type = 1
+cellular_distance_function = 2
+terrace_enabled = true
+
+[sub_resource type="VoxelGeneratorGraph" id="VoxelGeneratorGraph_h2yge"]
+graph_data = {
+"connections": [[12, 0, 14, 0], [10, 0, 4, 0], [9, 0, 10, 0], [8, 0, 9, 0], [7, 0, 8, 0], [6, 0, 8, 1], [2, 0, 7, 0], [1, 0, 12, 0]],
+"nodes": {
+"1": {
+"gui_position": Vector2(440, 50),
+"type": "InputX"
+},
+"10": {
+"gui_position": Vector2(1060, 160),
+"max": 1.0,
+"min": -1.0,
+"type": "Clamp"
+},
+"12": {
+"gui_position": Vector2(860, 280),
+"length": 4.0,
+"type": "Wrap"
+},
+"14": {
+"gui_position": Vector2(1180, 300),
+"type": "OutputSingleTexture"
+},
+"2": {
+"gui_position": Vector2(440, 150),
+"type": "InputY"
+},
+"3": {
+"gui_position": Vector2(440, 250),
+"type": "InputZ"
+},
+"4": {
+"auto_connect": true,
+"gui_position": Vector2(1240, 140),
+"type": "OutputSDF"
+},
+"6": {
+"auto_connect": true,
+"gui_position": Vector2(540, 220),
+"noise": SubResource("FastNoise2_0xm2m"),
+"type": "FastNoise2_3D",
+"x": 0.0,
+"y": 0.0,
+"z": 0.0
+},
+"7": {
+"b": 0.05,
+"gui_position": Vector2(560, 80),
+"type": "Multiply"
+},
+"8": {
+"gui_position": Vector2(740, 140),
+"type": "Add"
+},
+"9": {
+"curve": SubResource("Curve_0xm2m"),
+"gui_position": Vector2(900, 140),
+"type": "Curve"
+}
+},
+"version": 2
+}
+
+[sub_resource type="VoxelMesherTransvoxel" id="VoxelMesherTransvoxel_lquwl"]
+texturing_mode = 1
+textures_ignore_air_voxels = true
+
+[sub_resource type="Shader" id="Shader_h2yge"]
+code = "shader_type spatial;
+
+// From Voxel Tools API
+uniform int u_transition_mask;
+
+// Textures should preferably be in a Texture2DArray, so looking them up is cheap
+uniform sampler2DArray u_texture_array : source_color, filter_linear_mipmap;
+
+// We'll need to pass data from the vertex shader to the fragment shader
+varying vec4 v_indices;
+varying vec4 v_weights;
+varying vec3 v_normal;
+varying vec3 v_pos;
+
+// We'll use a utility function to decode components.
+// It returns 4 values in the range [0..255].
+vec4 decode_8bit_vec4(float v) {
+    uint i = floatBitsToUint(v);
+    return vec4(
+        float(i & uint(0xff)),
+        float((i >> uint(8)) & uint(0xff)),
+        float((i >> uint(16)) & uint(0xff)),
+        float((i >> uint(24)) & uint(0xff)));
+}
+
+// A voxel mesh can have overhangs in any direction,
+// so we may have to use triplanar mapping functions.
+vec3 get_triplanar_blend(vec3 world_normal) {
+    vec3 blending = abs(world_normal);
+    blending = normalize(max(blending, vec3(0.00001))); // Force weights to sum to 1.0
+    float b = blending.x + blending.y + blending.z;
+    return blending / vec3(b, b, b);
+}
+
+vec4 texture_array_triplanar(sampler2DArray tex, vec3 world_pos, vec3 blend, float i) {
+    vec4 xaxis = texture(tex, vec3(world_pos.yz, i));
+    vec4 yaxis = texture(tex, vec3(world_pos.xz, i));
+    vec4 zaxis = texture(tex, vec3(world_pos.xy, i));
+    // blend the results of the 3 planar projections.
+    return xaxis * blend.x + yaxis * blend.y + zaxis * blend.z;
+}
+
+float get_transvoxel_secondary_factor(int idata) {
+	int transition_mask = u_transition_mask & 0xff;
+
+	int cell_border_mask = idata & 63; // Which sides the cell is touching
+	int vertex_border_mask = (idata >> 8) & 63; // Which sides the vertex is touching
+	// If the vertex is near a side where there is a low-resolution neighbor,
+	// move it to secondary position
+	int m = transition_mask & cell_border_mask;
+	float t = float(m != 0);
+	// If the vertex lies on one or more sides, and at least one side has no low-resolution neighbor,
+	// don't move the vertex.
+	t *= float((vertex_border_mask & ~transition_mask) == 0);
+	
+	// Debugging
+	//t *= 0.5 + 0.5 * sin(TIME * 4.0);
+	//t *= 2.0;
+
+	return t;
+}
+
+vec3 get_transvoxel_position(vec3 vertex_pos, vec4 fdata) {
+	int idata = floatBitsToInt(fdata.a);
+
+	// Move vertices to smooth transitions
+	float secondary_factor = get_transvoxel_secondary_factor(idata);
+	vec3 secondary_position = fdata.xyz;
+	vec3 pos = mix(vertex_pos, secondary_position, secondary_factor);
+
+	// If the mesh combines transitions and the vertex belongs to a transition,
+	// when that transition isn't active we change the position of the vertices so
+	// all triangles will be degenerate and won't be visible.
+	// This is an alternative to rendering them separately,
+	// which has less draw calls and less mesh resources to create in Godot.
+	// Ideally I would tweak the index buffer like LOD does but Godot does not
+	// expose anything to use it that way.
+	int itransition = (idata >> 16) & 0xff; // Is the vertex on a transition mesh?
+	float transition_cull = float(itransition == 0 || (itransition & u_transition_mask) != 0);
+	pos *= transition_cull;
+
+	return pos;
+}
+
+void vertex() {
+	// Indices are integer values so we can decode them as-is
+    v_indices = decode_8bit_vec4(CUSTOM1.x);
+
+    // Weights must be in [0..1] so we divide them
+    v_weights = decode_8bit_vec4(CUSTOM1.y) / 255.0;
+
+    v_pos = VERTEX;
+    v_normal = NORMAL;
+	
+	VERTEX = get_transvoxel_position(VERTEX, CUSTOM0);
+}
+
+void fragment() {
+	//NORMAL = normalize(cross(dFdx(VERTEX), dFdy(VERTEX)));
+	NORMAL = normalize(cross(dFdy(VERTEX), dFdx(VERTEX)));
+	
+	// Define a texture scale for convenience.
+    // We can use an array instead if different scales per index is needed.
+    float uv_scale = 0.5;
+
+    // Sample the 4 blending textures, all with triplanar mapping.
+    // We can re-use the same triplanar blending factors for all of them so separating that part
+    // of the function improves performance a little.
+    vec3 blending = get_triplanar_blend(v_normal);
+    vec3 col0 = texture_array_triplanar(u_texture_array, v_pos * uv_scale, blending, v_indices.x).rgb;
+    vec3 col1 = texture_array_triplanar(u_texture_array, v_pos * uv_scale, blending, v_indices.y).rgb;
+    vec3 col2 = texture_array_triplanar(u_texture_array, v_pos * uv_scale, blending, v_indices.z).rgb;
+    vec3 col3 = texture_array_triplanar(u_texture_array, v_pos * uv_scale, blending, v_indices.w).rgb;
+
+    // Get weights and make sure they are normalized.
+    // We may add a tiny safety margin so we can afford some degree of error.
+    vec4 weights = v_weights;
+    weights /= (weights.x + weights.y + weights.z + weights.w + 0.00001);
+
+    // Calculate albedo
+    vec3 col = 
+        col0 * weights.r + 
+        col1 * weights.g + 
+        col2 * weights.b + 
+        col3 * weights.a;
+
+    ALBEDO = col;
+}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_1bvp3"]
+render_priority = 0
+shader = SubResource("Shader_h2yge")
+shader_parameter/u_transition_mask = 0
+shader_parameter/u_texture_array = ExtResource("3_1bvp3")
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_0xm2m"]
+
+[sub_resource type="Sky" id="Sky_h2yge"]
+sky_material = SubResource("ProceduralSkyMaterial_0xm2m")
+
+[sub_resource type="Environment" id="Environment_1bvp3"]
+background_mode = 2
+sky = SubResource("Sky_h2yge")
+
+[node name="Node3D" type="Node3D"]
+script = ExtResource("1_0xm2m")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.67178327, -0.700611, 0.24052423, 0.47575447, 0.65696365, 0.58485574, -0.5677719, -0.27846572, 0.77465594, 6.8082724, 0, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("TorusMesh_ig7tw")
+
+[node name="CameraAnchor" type="Node3D" parent="."]
+
+[node name="Camera3D" type="Camera3D" parent="CameraAnchor"]
+transform = Transform3D(0.9729701, 0.10357407, -0.20640141, 0, 0.8937795, 0.4485066, 0.230931, -0.4363835, 0.8696208, -4.4884486, 9.75332, 18.91096)
+script = ExtResource("3_h2yge")
+ANCHOR_NODE_PATH = NodePath("..")
+
+[node name="VoxelViewer" type="VoxelViewer" parent="CameraAnchor/Camera3D"]
+
+[node name="VoxelLodTerrain" type="VoxelLodTerrain" parent="."]
+generator = SubResource("VoxelGeneratorGraph_h2yge")
+mesher = SubResource("VoxelMesherTransvoxel_lquwl")
+voxel_bounds = AABB(-536870900, -512, -536870900, 1073741800, 1024, 1073741800)
+lod_distance = 96.0
+secondary_lod_distance = 96.0
+material = SubResource("ShaderMaterial_1bvp3")
+run_stream_in_editor = false
+threaded_update_enabled = true
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.5553803, 0)
+light_color = Color(0.6544786, 0.6351577, 0.8048659, 1)
+light_energy = 8.363
+light_indirect_energy = 7.111
+light_volumetric_fog_energy = 5.76
+shadow_enabled = true
+omni_range = 318.354
+omni_shadow_mode = 0
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_1bvp3")
