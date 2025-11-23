@@ -113,7 +113,6 @@ func _ready() -> void:
 	var surface_tool := SurfaceTool.new()
 	surface_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
 
-
 	self._uv_size = Vector2(1.0 / self.texture_tile_count.x, 1.0 / self.texture_tile_count.y)
 
 	var uv_tl := Vector2.ZERO
