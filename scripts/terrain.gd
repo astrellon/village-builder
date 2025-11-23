@@ -113,8 +113,6 @@ func _ready() -> void:
 	var surface_tool := SurfaceTool.new()
 	surface_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
 
-	var mi = MeshInstance3D.new()
-	self.add_child(mi)
 
 	self._uv_size = Vector2(1.0 / self.texture_tile_count.x, 1.0 / self.texture_tile_count.y)
 
@@ -193,5 +191,20 @@ func _ready() -> void:
 
 	surface_tool.generate_normals()
 	var mesh = surface_tool.commit()
+	
+	var collision_shape = ConcavePolygonShape3D.new()
+	collision_shape.set_faces(mesh.get_faces())
+	
+	var collision = CollisionShape3D.new()
+	collision.shape = collision_shape
+	
+	var mi = MeshInstance3D.new()
 	mi.mesh = mesh
 	mi.mesh.surface_set_material(0, self.material)
+	
+	var static_body = StaticBody3D.new()
+	static_body.add_child(collision)
+	static_body.add_child(mi)
+	
+	self.add_child(static_body)
+	
