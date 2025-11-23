@@ -7,18 +7,21 @@ const TILE_SIZE: float = 1.0
 @export var texture_tile_size = Vector2i(16, 16)
 @export var height_map: Image
 
+@export var noise: FastNoiseLite
+
 var rand = FastNoiseLite.new()
 
 func calc_height_at(x: float, y: float) -> float:
 	#var heightx = x * 0.5 - 2
 	#var heighty = y * 0.5 - 2
 	#return clampf(max(heightx, heighty), 0, 1)
-	@warning_ignore("narrowing_conversion")
-	var colour = self.height_map.get_pixel(x, y)
-	return colour.r * 5.0
+	#@warning_ignore("narrowing_conversion")
+	#var colour = self.height_map.get_pixel(x, y)
+	#return colour.r * 5.0
+	return self.noise.get_noise_2d(x, y) * 5.0
 
 func create_terrain() -> TerrainData:
-	const size = 64
+	const size = 128
 	var result: Array[TerrainTileData] = []
 	result.resize(size * size)
 	
@@ -134,7 +137,14 @@ static func create_cliff(temp_mesh: TempMesh, tri_index: int, dx: float, dy: flo
 	return tri_index
 
 func _ready() -> void:
+	
+	var before_mem = Performance.get_monitor(Performance.MEMORY_STATIC)
+	var before = Time.get_ticks_usec()
 	var terrain = create_terrain()
+	var after_mem = Performance.get_monitor(Performance.MEMORY_STATIC)
+	var after = Time.get_ticks_usec()
+	
+	print("Time taken %sus, memory: %d" % [(after - before), (after_mem - before_mem)])
 	
 	var mi = MeshInstance3D.new()
 	self.add_child(mi)
