@@ -6,6 +6,7 @@ var test_ball = preload("res://test_ball.tscn")
 
 @export var follow: Node3D
 @export var camera: Camera3D
+@export var terrain: Terrain
 
 func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("debug_draw"):
@@ -35,6 +36,15 @@ func _input(event):
 			var hit_position = result['position']
 			var new_position = Vector3(hit_position.x, hit_position.y + 2.0, hit_position.z)
 			self._spawn_balls(new_position)
+		if result.has('face_index'):
+			var face_index: int = result['face_index']
+			
+			var face_data := self.terrain.terrain.get_face_data(face_index)
+			var x := face_data & 0x3F
+			var y := (face_data >> 6) & 0x3F
+			var type := ((face_data >> 12) & 0x7) as TerrainData.FaceType
+			
+			print('Click on face %s, at %s, %s type: %s' % [face_index, x, y, type])
 
 func _spawn_balls(pos: Vector3) -> void:
 	var new_ball = self.test_ball.instantiate() as Node3D

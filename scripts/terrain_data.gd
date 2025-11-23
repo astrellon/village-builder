@@ -1,11 +1,14 @@
 class_name TerrainData
 
+enum FaceType { TYPE1 = 1, TYPE2 = 2, CLIFF_NORTH = 3, CLIFF_EAST = 4, CLIFF_SOUTH = 5, CLIFF_WEST = 6 }
+
 var size: int
 var data_types: PackedInt64Array
 var data_heights: PackedFloat32Array
+var data_face_lookup: PackedByteArray = PackedByteArray()
 
 @warning_ignore("shadowed_variable")
-func _init(size: int, data_types: PackedInt64Array, data_heights):
+func _init(size: int, data_types: PackedInt64Array, data_heights: PackedFloat32Array):
 	self.size = size
 	self.data_types = data_types
 	self.data_heights = data_heights
@@ -16,6 +19,12 @@ func get_tile_data_types(x: int, y: int) -> int:
 	
 	var index := x + y * self.size
 	return self.data_types.get(index)
+
+func get_face_data(face_index: int) -> int:
+	var index = face_index * 2
+	if index < 0 || index >= self.data_face_lookup.size():
+		return 0
+	return self.data_face_lookup.decode_s16(index)
 
 func get_tile_data_heights(x: int, y: int) -> Vector4:
 	if x < 0 || x >= self.size || y < 0 || y >= self.size:
@@ -39,3 +48,10 @@ static func create_type(is_flipped: bool, type1: int, type2: int, cliff_n: int, 
 	var e = (cliff_s << 32) & 0xFF00000000
 	var f = (cliff_w << 40) & 0xFF0000000000
 	return a | b | c | d | e | f | flipped_bit
+
+static func create_face_data(x: int, y: int, face_type: FaceType) -> int:
+	var a = x & 0x3F
+	var b = (y & 0x3F) << 6
+	var c = (int(face_type) & 0x7) << 12
+	
+	return a | b | c

@@ -49,10 +49,11 @@ noise = SubResource("FastNoiseLite_kek77")
 transform = Transform3D(-0.16730219, -0.58064175, 0.7967842, 0, 0.8081749, 0.5889425, -0.98590565, 0.09853137, -0.13520943, 0, 0, 0)
 shadow_enabled = true
 
-[node name="Debug" type="Node3D" parent="." node_paths=PackedStringArray("follow", "camera")]
+[node name="Debug" type="Node3D" parent="." node_paths=PackedStringArray("follow", "camera", "terrain")]
 script = ExtResource("4_1bvp3")
 follow = NodePath("../CameraTarget")
 camera = NodePath("../Camera3D")
+terrain = NodePath("../Terrain")
 
 [node name="PhantomCamera3D" type="Node3D" parent="." node_paths=PackedStringArray("follow_target")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5730832, 5.59)
