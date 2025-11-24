@@ -25,7 +25,7 @@ func calc_height_at(x: float, y: float) -> float:
 	return self.noise.get_noise_2d(x, y) * 4.0
 
 func create_terrain() -> TerrainData:
-	const size = 32
+	const size = 64
 	var types = PackedInt64Array()
 	var heights = PackedFloat32Array()
 	types.resize(size * size)
@@ -43,9 +43,9 @@ func create_terrain() -> TerrainData:
 			#var height3 = base_height + rand.get_noise_2d(x, y + 0.5)
 			#var height4 = base_height + rand.get_noise_2d(x + 0.5, y + 0.5)
 			var height1 = self.calc_height_at(x, y) + 3
-			var height2 = self.calc_height_at(x + 1, y) + 3
-			var height3 = self.calc_height_at(x, y + 1) + 3
-			var height4 = self.calc_height_at(x + 1, y + 1) + 3
+			var height2 = self.calc_height_at(x + 0.5, y) + 3
+			var height3 = self.calc_height_at(x, y + 0.5) + 3
+			var height4 = self.calc_height_at(x + 0.5, y + 0.5) + 3
 
 			var flip_orientation = index % 2 == 0
 
@@ -93,7 +93,7 @@ func create_cliff(surface_tool: SurfaceTool, face_index: int, face_lookup: Packe
 static func add_face_lookup(face_lookup: PackedByteArray, face_index: int, x: int, y: int, face_type: TerrainData.FaceType, add_two: bool = false) -> int:
 	var packed = TerrainData.create_face_data(x, y, face_type)
 	if face_index >= face_lookup.size():
-		face_lookup.resize(face_lookup.size() + 256)
+		face_lookup.resize(face_lookup.size() + 1024)
 	
 	face_lookup.encode_s16(face_index, packed)
 	if add_two:
