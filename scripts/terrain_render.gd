@@ -10,6 +10,20 @@ class_name TerrainRender
 var _rendered_terrain = false
 var _chunks: Dictionary[Vector3i, TerrainChunkRender] = {}
 
+static var _surface_tools: Array[SurfaceTool] = []
+
+static func get_surface_tool() -> SurfaceTool:
+	if _surface_tools.size() == 0:
+		var new_tool = SurfaceTool.new()
+		return new_tool
+	else:
+		var tool = _surface_tools.pop_back()
+		tool.clear()
+		return tool
+
+static func release_surface_tool(tool: SurfaceTool) -> void:
+	_surface_tools.push_back(tool)
+
 func _process(_delta: float) -> void:
 	if self._rendered_terrain || self.terrain_manager == null || !self.terrain_manager.has_terrain_data:
 		return

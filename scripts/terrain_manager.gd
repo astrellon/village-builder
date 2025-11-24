@@ -19,10 +19,10 @@ func calc_height_at(x: float, y: float) -> float:
 	return self.noise.get_noise_2d(x, y) * 4.0
 
 func create_terrain_chunk(size: int, position: Vector3i) -> TerrainChunkData:
-	var types = PackedInt64Array()
-	var heights = PackedFloat32Array()
+	var types := PackedInt64Array()
+	var heights := PackedVector4Array()
 	types.resize(size * size)
-	heights.resize(size * size * 4)
+	heights.resize(size * size)
 
 	var index = 0
 	for y in range(size):
@@ -44,11 +44,12 @@ func create_terrain_chunk(size: int, position: Vector3i) -> TerrainChunkData:
 
 			types[index] = tile_type
 
-			var height_index = index * 4
-			heights[height_index] = height1
-			heights[height_index + 1] = height2
-			heights[height_index + 2] = height3
-			heights[height_index + 3] = height4
+			heights[index] = Vector4(height1, height2, height3, height4)
+			#var height_index = index * 4
+			#heights[height_index] = height1
+			#heights[height_index + 1] = height2
+			#heights[height_index + 2] = height3
+			#heights[height_index + 3] = height4
 			index += 1
 
 	return TerrainChunkData.new(position, size, types, heights)

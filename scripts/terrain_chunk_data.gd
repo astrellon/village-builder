@@ -5,12 +5,12 @@ enum FaceType { TYPE1 = 1, TYPE2 = 2, CLIFF_NORTH = 3, CLIFF_EAST = 4, CLIFF_SOU
 var position: Vector3i
 var size: int
 var data_types: PackedInt64Array
-var data_heights: PackedFloat32Array
+var data_heights: PackedVector4Array
 var data_face_lookup: PackedByteArray = PackedByteArray()
 var data_version: int = 0
 
 @warning_ignore("shadowed_variable")
-func _init(position: Vector3i, size: int, data_types: PackedInt64Array, data_heights: PackedFloat32Array):
+func _init(position: Vector3i, size: int, data_types: PackedInt64Array, data_heights: PackedVector4Array):
 	self.position = position
 	self.size = size
 	self.data_types = data_types
@@ -33,20 +33,31 @@ func get_tile_data_heights(x: int, y: int) -> Vector4:
 	if x < 0 || x >= self.size || y < 0 || y >= self.size:
 		return Vector4.ZERO
 	
-	var index := (x + y * self.size) * 4
-	var height1 = self.data_heights.get(index)
-	var height2 = self.data_heights.get(index + 1)
-	var height3 = self.data_heights.get(index + 2)
-	var height4 = self.data_heights.get(index + 3)
-	
-	return Vector4(height1, height2, height3, height4)
+	var index := x + y * self.size
+	return self.data_heights[index]
+	#var index := (x + y * self.size) * 4
+	#var height1 = self.data_heights.get(index)
+	#var height2 = self.data_heights.get(index + 1)
+	#var height3 = self.data_heights.get(index + 2)
+	#var height4 = self.data_heights.get(index + 3)
+	#
+	#return Vector4(height1, height2, height3, height4)
 
 func set_heights(x: int, y: int, heights: Vector4) -> void:
-	var index := (x + y * self.size) * 4;
-	self.data_heights[index] = heights.x
-	self.data_heights[index + 1] = heights.y
-	self.data_heights[index + 2] = heights.z
-	self.data_heights[index + 3] = heights.w
+	var index := x + y * self.size;
+	self.data_heights[index] = heights
+	#var height_index := index * 4
+	#self.data_heights[height_index] = heights.x
+	#self.data_heights[height_index + 1] = heights.y
+	#self.data_heights[height_index + 2] = heights.z
+	#self.data_heights[height_index + 3] = heights.w
+	
+	var type := self.data_types[index]
+	if type < 0:
+		type &= 0x7FFFFFFFFFFFFFFF
+	else:
+		type |= 1 << 63
+	self.data_types[index] = type
 	
 	self.data_version += 1
 

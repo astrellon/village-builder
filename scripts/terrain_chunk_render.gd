@@ -120,7 +120,7 @@ func _generate_mesh(face_lookup: PackedByteArray) -> Mesh:
 		face_lookup.resize(face_lookup_size)
 	var face_index = 0
 
-	var surface_tool := SurfaceTool.new()
+	var surface_tool := TerrainRender.get_surface_tool()
 	surface_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
 
 	var uv_tl := Vector2.ZERO
@@ -205,4 +205,7 @@ func _generate_mesh(face_lookup: PackedByteArray) -> Mesh:
 	print('Created terrain, num faces: %s' % face_index)
 	
 	surface_tool.generate_normals()
-	return surface_tool.commit()
+	var mesh = surface_tool.commit()
+	
+	TerrainRender.release_surface_tool(surface_tool)
+	return mesh
