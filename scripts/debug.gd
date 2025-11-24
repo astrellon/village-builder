@@ -6,7 +6,7 @@ var test_ball = preload("res://test_ball.tscn")
 
 @export var follow: Node3D
 @export var camera: Camera3D
-@export var terrain: Terrain
+@export var terrain: TerrainRender
 
 func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("debug_draw"):
@@ -31,20 +31,26 @@ func _input(event):
 		
 		var query := PhysicsRayQueryParameters3D.create(from, to)
 		query.collide_with_areas = true
+		
 		var result := space_state.intersect_ray(query)
 		if result.has('position'):
 			var hit_position = result['position']
 			var new_position = Vector3(hit_position.x, hit_position.y + 2.0, hit_position.z)
 			self._spawn_balls(new_position)
-		if result.has('face_index'):
+		
+		if result.has('face_index') and result.has('collider'):
 			var face_index: int = result['face_index']
+			var collider: StaticBody3D = result['collider']
 			
-			var face_data := self.terrain.terrain.get_face_data(face_index)
+			var terrain_chunk_render := collider.get_parent() as TerrainChunkRender
+			
+			var face_data := terrain_chunk_render._terrain.get_face_data(face_index)
 			var x := face_data & 0x3F
 			var y := (face_data >> 6) & 0x3F
-			var type := ((face_data >> 12) & 0x7) as TerrainData.FaceType
+			var type := ((face_data >> 12) & 0x7) as TerrainChunkData.FaceType
 			
-			print('Click on face %s, at %s, %s type: %s' % [face_index, x, y, type])
+			var pos = terrain_chunk_render._terrain.position
+			print('Click on chunk %s,%s,%s, face %s, at %s, %s type: %s' % [pos.x, pos.y, pos.z, face_index, x, y, type])
 
 func _spawn_balls(pos: Vector3) -> void:
 	var new_ball = self.test_ball.instantiate() as Node3D
