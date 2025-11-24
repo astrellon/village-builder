@@ -33,5 +33,8 @@ func _render_terrain_chunk(terrain_chunk_data: TerrainChunkData) -> TerrainChunk
 	render.texture_tile_size = self.texture_tile_size
 	
 	self.add_child(render)
+	var before = Time.get_ticks_usec()
 	render.create_for_terrain(terrain_chunk_data)
+	var after = Time.get_ticks_usec()
+	print('Time to render chunk %sus' % (after - before))
 	return render

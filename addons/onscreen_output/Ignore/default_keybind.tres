@@ -1,0 +1,6 @@
+[gd_resource type="InputEventKey" format=3 uid="uid://dr650bnyy3u75"]
+
+[resource]
+device = -1
+keycode = 96
+unicode = 96

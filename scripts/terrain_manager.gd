@@ -54,7 +54,7 @@ func create_terrain_chunk(size: int, position: Vector3i) -> TerrainChunkData:
 	return TerrainChunkData.new(position, size, types, heights)
 
 func create_terrain() -> TerrainData:
-	const size = 64
+	const size = 32
 	var chunks: Dictionary[Vector3i, TerrainChunkData] = {}
 	for x in range(-1, 2):
 		for z in range(-1, 2):
