@@ -12,7 +12,8 @@
 [ext_resource type="Script" uid="uid://vv2knc54s0o7" path="res://scripts/terrain_manager.gd" id="10_4c57u"]
 
 [sub_resource type="Curve" id="Curve_efxa6"]
-_data = [Vector2(0, 0.5), 0.0, 0.0, 0, 1, Vector2(1, 0.5), 0.0, 0.0, 1, 0]
+_limits = [-1.0, 1.0, 0.0, 1.0]
+_data = [Vector2(0, 0.9887641), 0.0, -1.4494383, 0, 1, Vector2(1, -0.46067417), -1.4494383, 0.0, 1, 0]
 point_count = 2
 
 [sub_resource type="Resource" id="Resource_dg77c"]

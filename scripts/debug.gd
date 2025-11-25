@@ -52,7 +52,10 @@ func _input(event):
 			var hit_position = result['position']
 			#var new_position = Vector3(hit_position.x, hit_position.y + 2.0, hit_position.z)
 			#self._spawn_balls(new_position)
-			self.terrain_manager.terrain_data.brush_heights(hit_position, self.terrain_brush, height_change, self._is_shift_down)
+			
+			#self.terrain_manager.terrain_data.brush_heights(hit_position, self.terrain_brush, height_change, self._is_shift_down)
+			var type := 1 if self._is_shift_down else 0
+			self.terrain_manager.terrain_data.brush_types(hit_position, self.terrain_brush, type, 0x03)
 		
 		#if result.has('face_index') and result.has('collider'):
 			#var face_index: int = result['face_index']

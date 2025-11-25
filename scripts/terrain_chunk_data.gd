@@ -61,6 +61,28 @@ func set_heights(x: int, y: int, heights: Vector4) -> void:
 	
 	self.data_version += 1
 
+func brush_types(local_pos: Vector3, shape: TerrainBrushShape, type: int, type_mask: int) -> void:
+	var index := 0
+	var has_change := false
+	for z in range(self.size):
+		for x in range(self.size):
+			var types := self.data_types[index]
+			var heights := self.data_heights[index]
+			var average_height := (heights.x + heights.y + heights.z + heights.w) * 0.25
+			
+			var center_point := Vector3(x + 0.5, average_height, z + 0.5)
+			var diff = shape.evaluate(local_pos, center_point)
+			if diff > 0.001:
+				var new_type := change_type(types, type, type_mask)
+				if new_type != types:
+					has_change = true
+					self.data_types[index] = new_type
+			
+			index += 1
+	
+	if has_change:
+		self.data_version += 1
+
 func brush_heights(local_pos: Vector3, shape: TerrainBrushShape, height_scale: float, use_whole_tile: bool) -> void:
 	var index := 0
 	var has_change := false
@@ -69,8 +91,8 @@ func brush_heights(local_pos: Vector3, shape: TerrainBrushShape, height_scale: f
 			var heights := self.data_heights[index]
 			
 			if use_whole_tile:
-				var average_height = (heights.x + heights.y + heights.z + heights.w) * 0.25
-				var center_point = Vector3(x + 0.5, average_height, z + 0.5)
+				var average_height := (heights.x + heights.y + heights.z + heights.w) * 0.25
+				var center_point := Vector3(x + 0.5, average_height, z + 0.5)
 				var diff = shape.evaluate(local_pos, center_point) * height_scale
 				if !is_zero_approx(diff):
 					heights.x += diff
@@ -113,6 +135,17 @@ static func create_type(is_flipped: bool, type1: int, type2: int, cliff_n: int, 
 	var e = (cliff_s & 0xFF) << 32
 	var f = (cliff_w & 0xFF) << 40
 	return a | b | c | d | e | f | flipped_bit
+
+static func change_type(original_type: int, type: int, type_mask: int) -> int:
+	var flipped_bit = original_type & (1 << 63)
+	var type1 := type if type_mask & 0x01 else original_type & 0xFF
+	var type2 := type if type_mask & 0x02 else (original_type >> 8) & 0xFF
+	var cliff_n := type if type_mask & 0x04 else (original_type >> 16) & 0xFF
+	var cliff_e := type if type_mask & 0x08 else (original_type >> 24) & 0xFF
+	var cliff_s := type if type_mask & 0x0F else (original_type >> 32) & 0xFF
+	var cliff_w := type if type_mask & 0x10 else (original_type >> 40) & 0xFF
+	
+	return type1 | (type2 << 8) | (cliff_n << 16) | (cliff_e << 24) | (cliff_s << 32) | (cliff_w << 40) | flipped_bit
 
 static func create_face_data(x: int, y: int, face_type: FaceType) -> int:
 	var a = x & 0x3F

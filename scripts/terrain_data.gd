@@ -10,7 +10,17 @@ func _init(size: int, chunks: Dictionary[Vector3i, TerrainChunkData]) -> void:
 	self.size = size
 	self.chunks = chunks
 
+func brush_types(world_pos: Vector3, shape: TerrainBrushShape, type: int, type_mask: int) -> void:
+	var action = func _action(local_pos: Vector3, chunk: TerrainChunkData) -> void:
+		chunk.brush_types(local_pos, shape, type, type_mask)
+	self._apply_to_chunks(world_pos, shape, action)
+
 func brush_heights(world_pos: Vector3, shape: TerrainBrushShape, height_scale: float, use_whole_tile: bool) -> void:
+	var action = func _action(local_pos: Vector3, chunk: TerrainChunkData) -> void:
+		chunk.brush_heights(local_pos, shape, height_scale, use_whole_tile)
+	self._apply_to_chunks(world_pos, shape, action)
+
+func _apply_to_chunks(world_pos: Vector3, shape: TerrainBrushShape, action: Callable) -> void:
 	var shape_size := shape.size()
 	if is_zero_approx(shape_size.length()):
 		return
@@ -31,7 +41,7 @@ func brush_heights(world_pos: Vector3, shape: TerrainBrushShape, height_scale: f
 				var local_pos := world_pos - chunk_offset
 				
 				var chunk := self.chunks[chunk_index]
-				chunk.brush_heights(local_pos, shape, height_scale, use_whole_tile)
+				action.call(local_pos, chunk)
 
 func brush_flat(world_pos: Vector3, height: float) -> void:
 	var chunk_index := self.get_chunk_index(world_pos)
