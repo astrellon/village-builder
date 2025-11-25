@@ -9,7 +9,30 @@ var chunks: Dictionary[Vector3i, TerrainChunkData] = {}
 func _init(size: int, chunks: Dictionary[Vector3i, TerrainChunkData]) -> void:
 	self.size = size
 	self.chunks = chunks
+
+func brush_heights(world_pos: Vector3, shape: TerrainBrushShape, height_scale: float, use_whole_tile: bool) -> void:
+	var shape_size := shape.size()
+	if is_zero_approx(shape_size.length()):
+		return
 	
+	var half_size := shape_size * 0.5
+	
+	var min_chunk_index := self.get_chunk_index(world_pos - half_size)
+	var max_chunk_index := self.get_chunk_index(world_pos + half_size)
+	
+	for z in range(min_chunk_index.z, max_chunk_index.z + 1):
+		for y in range(min_chunk_index.y, max_chunk_index.y + 1):
+			for x in range(min_chunk_index.x, max_chunk_index.x + 1):
+				var chunk_index := Vector3i(x, y, z)
+				if !self.chunks.has(chunk_index):
+					continue
+					
+				var chunk_offset := Vector3(chunk_index) * self.size
+				var local_pos := world_pos - chunk_offset
+				
+				var chunk := self.chunks[chunk_index]
+				chunk.brush_heights(local_pos, shape, height_scale, use_whole_tile)
+
 func brush_flat(world_pos: Vector3, height: float) -> void:
 	var chunk_index := self.get_chunk_index(world_pos)
 	if !self.chunks.has(chunk_index):

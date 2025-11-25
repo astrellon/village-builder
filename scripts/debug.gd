@@ -7,6 +7,9 @@ var test_ball = preload("res://test_ball.tscn")
 @export var follow: Node3D
 @export var camera: Camera3D
 @export var terrain_manager: TerrainManager
+@export var terrain_brush: TerrainBrushShape
+
+var _is_shift_down := false
 
 func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("debug_draw"):
@@ -24,7 +27,19 @@ func _process(_delta: float) -> void:
 		self._spawn_balls(new_position)
 	
 func _input(event):
-	if event is InputEventMouseButton and event.pressed and event.button_index == 1:
+	if event is InputEventKey and event.keycode == Key.KEY_SHIFT:
+		self._is_shift_down = event.is_pressed()
+	
+	if event is InputEventMouseButton and event.pressed:
+		var height_change := 0.0
+		if event.button_index == 1:
+			height_change = 1.0
+		elif event.button_index == 2:
+			height_change = -1.0
+		
+		if is_zero_approx(height_change):
+			return
+			
 		var space_state := get_world_3d().direct_space_state
 		var from := self.camera.project_ray_origin(event.position)
 		var to := from + self.camera.project_ray_normal(event.position) * 100
@@ -37,7 +52,7 @@ func _input(event):
 			var hit_position = result['position']
 			#var new_position = Vector3(hit_position.x, hit_position.y + 2.0, hit_position.z)
 			#self._spawn_balls(new_position)
-			self.terrain_manager.terrain_data.brush_flat(hit_position, 4.0)
+			self.terrain_manager.terrain_data.brush_heights(hit_position, self.terrain_brush, height_change, self._is_shift_down)
 		
 		#if result.has('face_index') and result.has('collider'):
 			#var face_index: int = result['face_index']

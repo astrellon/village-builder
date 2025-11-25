@@ -1,14 +1,25 @@
-[gd_scene load_steps=18 format=3 uid="uid://l388sbifpguy"]
+[gd_scene load_steps=21 format=3 uid="uid://l388sbifpguy"]
 
 [ext_resource type="Script" uid="uid://dkmvsng6gd63s" path="res://scripts/terrain_render.gd" id="1_lquwl"]
 [ext_resource type="Material" uid="uid://b6fquxhbgv26p" path="res://terrain_tileset.tres" id="2_4c57u"]
 [ext_resource type="Script" uid="uid://cmn1kiv4rybeu" path="res://scripts/debug.gd" id="4_1bvp3"]
+[ext_resource type="Script" uid="uid://dcr04jxmwmvln" path="res://scripts/terrain_brush_shape_circle.gd" id="4_4c57u"]
 [ext_resource type="Script" uid="uid://csjccrhj5wnx7" path="res://addons/phantom_camera/scripts/phantom_camera/phantom_camera_3d.gd" id="6_272bh"]
 [ext_resource type="Script" uid="uid://8umksf8e80fw" path="res://addons/phantom_camera/scripts/resources/tween_resource.gd" id="7_5vw27"]
 [ext_resource type="Script" uid="uid://b8hhnqsugykly" path="res://addons/phantom_camera/scripts/resources/camera_3d_resource.gd" id="8_5vw27"]
 [ext_resource type="Script" uid="uid://bd046eokvcnu2" path="res://addons/phantom_camera/scripts/phantom_camera_host/phantom_camera_host.gd" id="8_kek77"]
 [ext_resource type="Script" uid="uid://dus7cqshingla" path="res://scripts/camera_target.gd" id="9_kek77"]
 [ext_resource type="Script" uid="uid://vv2knc54s0o7" path="res://scripts/terrain_manager.gd" id="10_4c57u"]
+
+[sub_resource type="Curve" id="Curve_efxa6"]
+_data = [Vector2(0, 0.5), 0.0, 0.0, 0, 1, Vector2(1, 0.5), 0.0, 0.0, 1, 0]
+point_count = 2
+
+[sub_resource type="Resource" id="Resource_dg77c"]
+script = ExtResource("4_4c57u")
+radius = 5.0
+curve = SubResource("Curve_efxa6")
+metadata/_custom_type_script = "uid://dcr04jxmwmvln"
 
 [sub_resource type="Resource" id="Resource_kek77"]
 script = ExtResource("7_5vw27")
@@ -50,6 +61,7 @@ script = ExtResource("4_1bvp3")
 follow = NodePath("../CameraTarget")
 camera = NodePath("../Camera3D")
 terrain_manager = NodePath("../TerrainManager")
+terrain_brush = SubResource("Resource_dg77c")
 
 [node name="PhantomCamera3D" type="Node3D" parent="." node_paths=PackedStringArray("follow_target")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5730832, 5.59)

@@ -61,15 +61,57 @@ func set_heights(x: int, y: int, heights: Vector4) -> void:
 	
 	self.data_version += 1
 
+func brush_heights(local_pos: Vector3, shape: TerrainBrushShape, height_scale: float, use_whole_tile: bool) -> void:
+	var index := 0
+	var has_change := false
+	for z in range(self.size):
+		for x in range(self.size):
+			var heights := self.data_heights[index]
+			
+			if use_whole_tile:
+				var average_height = (heights.x + heights.y + heights.z + heights.w) * 0.25
+				var center_point = Vector3(x + 0.5, average_height, z + 0.5)
+				var diff = shape.evaluate(local_pos, center_point) * height_scale
+				if !is_zero_approx(diff):
+					heights.x += diff
+					heights.y += diff
+					heights.z += diff
+					heights.w += diff
+					
+					self.data_heights[index] = heights
+					has_change = true
+			else:
+				var original_heights := heights
+				var height1 := Vector3(x, heights.x, z)
+				heights.x += shape.evaluate(local_pos, height1) * height_scale
+				
+				var height2 := Vector3(x + 1, heights.y, z)
+				heights.y += shape.evaluate(local_pos, height2) * height_scale
+				
+				var height3 := Vector3(x, heights.z, z + 1)
+				heights.z += shape.evaluate(local_pos, height3) * height_scale
+				
+				var height4 := Vector3(x + 1, heights.w, z + 1)
+				heights.w += shape.evaluate(local_pos, height4) * height_scale
+				
+				if heights != original_heights:
+					self.data_heights[index] = heights
+					has_change = true
+				
+			index += 1
+	
+	if has_change:
+		self.data_version += 1
+
 @warning_ignore("shadowed_variable")
 static func create_type(is_flipped: bool, type1: int, type2: int, cliff_n: int, cliff_e: int, cliff_s: int, cliff_w: int) -> int:
 	var flipped_bit = 1 << 63 if is_flipped else 0
 	var a = type1 & 0xFF
-	var b = (type2 << 8) & 0xFF00
-	var c = (cliff_n << 16) & 0xFF0000
-	var d = (cliff_e << 24) & 0xFF000000
-	var e = (cliff_s << 32) & 0xFF00000000
-	var f = (cliff_w << 40) & 0xFF0000000000
+	var b = (type2 & 0xFF) << 8
+	var c = (cliff_n & 0xFF) << 16
+	var d = (cliff_e & 0xFF) << 24
+	var e = (cliff_s & 0xFF) << 32
+	var f = (cliff_w & 0xFF) << 40
 	return a | b | c | d | e | f | flipped_bit
 
 static func create_face_data(x: int, y: int, face_type: FaceType) -> int:
