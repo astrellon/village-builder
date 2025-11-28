@@ -12,23 +12,29 @@ enum EditorToolType { Orbit, Types, Heights }
 @export var camera: Camera3D
 @export var phantom_camera: PhantomCamera3D
 @export var terrain_manager: TerrainManager
-@export var terrain_brush: TerrainBrushShape
+
+@export var terrain_brush_circle: TerrainBrushShapeCircle
+@export var terrain_brush_rectangle: TerrainBrushShapeRectangle
 
 @export var orbit_camera: EditorCameraOrbit
 @export var brush_types_tool: EditorBrushTypes
 @export var brush_heights_tool: EditorBrushHeights
 
-@export var test_material: ShaderMaterial
+@export var terrain_material: StandardMaterial3D
+@export var terrain_brush_circle_material: ShaderMaterial
+@export var terrain_brush_rectangle_material: ShaderMaterial
+
+static var instance: EditorController
 
 var _current_tool: EditorTool
 var is_shift_down := false
 var locked_orbit := false
+var terrain_brush: TerrainBrushShape
 
 func _ready() -> void:
-	if self.terrain_brush is TerrainBrushShapeCircle:
-		var curve_values = self.terrain_brush.create_curve_values()
-		self.test_material.set_shader_parameter('curve_values', curve_values)
-		self.test_material.set_shader_parameter('radius', self.terrain_brush.radius)
+	instance = self
+	
+	self.change_terrain_shape(self.terrain_brush_circle)
 
 func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("debug_draw"):
@@ -44,25 +50,6 @@ func _process(_delta: float) -> void:
 		var follow_position = self.follow.global_position
 		var new_position = Vector3(follow_position.x, 6, follow_position.z)
 		self._spawn_balls(new_position)
-
-func do_mouse_raycast(event: InputEventMouse) -> Dictionary:
-	var space_state := get_world_3d().direct_space_state
-	var from := self.camera.project_ray_origin(event.position)
-	var to := from + self.camera.project_ray_normal(event.position) * 100
-	
-	var query := PhysicsRayQueryParameters3D.create(from, to)
-	query.collide_with_areas = true
-	
-	var result := space_state.intersect_ray(query)
-	return result
-
-func change_tool(tool: EditorToolType) -> void:
-	if tool == EditorToolType.Orbit:
-		self._current_tool = self.orbit_camera
-	elif tool == EditorToolType.Types:
-		self._current_tool = self.brush_types_tool
-	elif tool == EditorToolType.Heights:
-		self._current_tool = self.brush_heights_tool
 
 func _input(event: InputEvent):
 	if event is InputEventKey and event.keycode == Key.KEY_SHIFT:
@@ -85,7 +72,53 @@ func _input(event: InputEvent):
 		var result := self.do_mouse_raycast(event)
 		if result.has('position'):
 			var target_pos: Vector3 = result['position']
-			self.test_material.set_shader_parameter('target_pos', target_pos)
+			self.terrain_material.next_pass.set_shader_parameter('target_pos', target_pos)
+
+func do_mouse_raycast(event: InputEventMouse) -> Dictionary:
+	var space_state := get_world_3d().direct_space_state
+	var from := self.camera.project_ray_origin(event.position)
+	var to := from + self.camera.project_ray_normal(event.position) * 100
+	
+	var query := PhysicsRayQueryParameters3D.create(from, to)
+	query.collide_with_areas = true
+	
+	var result := space_state.intersect_ray(query)
+	return result
+
+func change_tool(tool: EditorToolType) -> void:
+	if tool == EditorToolType.Orbit:
+		self._current_tool = self.orbit_camera
+	elif tool == EditorToolType.Types:
+		self._current_tool = self.brush_types_tool
+	elif tool == EditorToolType.Heights:
+		self._current_tool = self.brush_heights_tool
+
+func change_terrain_shape(shape: TerrainBrushShape) -> void:
+	if self.terrain_brush == shape:
+		return
+	
+	if self.terrain_brush != null:
+		self.terrain_brush.on_change.disconnect(self.on_shape_change)
+	self.terrain_brush = shape
+	if self.terrain_brush != null:
+		self.on_shape_change()
+		self.terrain_brush.on_change.connect(self.on_shape_change)
+
+func on_shape_change() -> void:
+	if self.terrain_brush is TerrainBrushShapeCircle:
+		self.terrain_material.next_pass = self.terrain_brush_circle_material
+		var curve_values = self.terrain_brush.create_curve_values()
+		self.terrain_brush_circle_material.set_shader_parameter('curve_values', curve_values)
+		self.terrain_brush_circle_material.set_shader_parameter('radius', self.terrain_brush.radius)
+	
+	elif self.terrain_brush is TerrainBrushShapeRectangle:
+		self.terrain_material.next_pass = self.terrain_brush_rectangle_material
+		var curve_values = self.terrain_brush.create_curve_values()
+		self.terrain_brush_rectangle_material.set_shader_parameter('curve_values', curve_values)
+		self.terrain_brush_rectangle_material.set_shader_parameter('hals_size', self.terrain_brush.half_size)
+	
+	else:
+		self.terrain_material.next_pass = null
 	
 	#if event is InputEventMouseButton and event.pressed:
 		#var height_change := 0.0

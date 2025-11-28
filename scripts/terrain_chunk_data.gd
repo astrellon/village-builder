@@ -35,22 +35,10 @@ func get_tile_data_heights(x: int, y: int) -> Vector4:
 	
 	var index := x + y * self.size
 	return self.data_heights[index]
-	#var index := (x + y * self.size) * 4
-	#var height1 = self.data_heights.get(index)
-	#var height2 = self.data_heights.get(index + 1)
-	#var height3 = self.data_heights.get(index + 2)
-	#var height4 = self.data_heights.get(index + 3)
-	#
-	#return Vector4(height1, height2, height3, height4)
 
 func set_heights(x: int, y: int, heights: Vector4) -> void:
 	var index := x + y * self.size;
 	self.data_heights[index] = heights
-	#var height_index := index * 4
-	#self.data_heights[height_index] = heights.x
-	#self.data_heights[height_index + 1] = heights.y
-	#self.data_heights[height_index + 2] = heights.z
-	#self.data_heights[height_index + 3] = heights.w
 	
 	var type := self.data_types[index]
 	if type < 0:

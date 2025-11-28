@@ -1,9 +1,10 @@
-[gd_scene load_steps=29 format=3 uid="uid://l388sbifpguy"]
+[gd_scene load_steps=41 format=3 uid="uid://l388sbifpguy"]
 
 [ext_resource type="Script" uid="uid://dkmvsng6gd63s" path="res://scripts/terrain_render.gd" id="1_lquwl"]
 [ext_resource type="Material" uid="uid://bex41odk5pf6u" path="res://materials/terrain_material.tres" id="2_w48qg"]
 [ext_resource type="Script" uid="uid://cmn1kiv4rybeu" path="res://scripts/editor_controller.gd" id="4_1bvp3"]
-[ext_resource type="Script" uid="uid://dcr04jxmwmvln" path="res://scripts/terrain_brush_shape_circle.gd" id="4_4c57u"]
+[ext_resource type="Script" uid="uid://b640bmyfflwr3" path="res://scripts/terrain_brush/terrain_brush_shape_rectangle.gd" id="4_2cqfq"]
+[ext_resource type="Script" uid="uid://dcr04jxmwmvln" path="res://scripts/terrain_brush/terrain_brush_shape_circle.gd" id="4_4c57u"]
 [ext_resource type="Script" uid="uid://sjr8ynqsa5aj" path="res://scripts/editor_tools/editor_camera_orbit.gd" id="5_efxa6"]
 [ext_resource type="Script" uid="uid://csjccrhj5wnx7" path="res://addons/phantom_camera/scripts/phantom_camera/phantom_camera_3d.gd" id="6_272bh"]
 [ext_resource type="Script" uid="uid://dpyeg65qnyogg" path="res://scripts/editor_tools/editor_brush_types.gd" id="6_ycdy4"]
@@ -14,17 +15,30 @@
 [ext_resource type="Material" uid="uid://d24h4abx6plu0" path="res://materials/terrain_circle_shape.tres" id="8_vivmo"]
 [ext_resource type="Script" uid="uid://dus7cqshingla" path="res://scripts/camera_target.gd" id="9_kek77"]
 [ext_resource type="Script" uid="uid://vv2knc54s0o7" path="res://scripts/terrain_manager.gd" id="10_4c57u"]
+[ext_resource type="Material" uid="uid://lfi88l8g8hb0" path="res://materials/terrain_rectangle_shape.tres" id="10_074og"]
 [ext_resource type="Script" uid="uid://cn7ma8c5m8vhw" path="res://scripts/editor_ui/change_editor_tool.gd" id="14_w48qg"]
+[ext_resource type="Script" uid="uid://dys4uf87b5u7r" path="res://scripts/editor_ui/change_brush_circle_shape.gd" id="16_2cqfq"]
+[ext_resource type="Script" uid="uid://b5htcmblb0woe" path="res://scripts/editor_ui/change_brush_rectangle_shape.gd" id="19_cegan"]
 
-[sub_resource type="Curve" id="Curve_efxa6"]
-_data = [Vector2(0, 1), 0.0, -4.8888893, 0, 1, Vector2(0.20454545, 0), 0.0732419, 0.0732419, 0, 0, Vector2(0.8011364, 0), 0.0, 0.0, 0, 0, Vector2(1, 1), 5.028572, 0.0, 1, 0]
-point_count = 4
+[sub_resource type="Curve" id="Curve_yaehf"]
+_data = [Vector2(0, 0), 0.0, 1.0, 0, 1, Vector2(1, 1), 1.0, 0.0, 1, 0]
+point_count = 2
 
-[sub_resource type="Resource" id="Resource_dg77c"]
+[sub_resource type="Resource" id="Resource_074og"]
 script = ExtResource("4_4c57u")
-radius = 5.0
-curve = SubResource("Curve_efxa6")
+radius = 2.0
+curve = SubResource("Curve_yaehf")
 metadata/_custom_type_script = "uid://dcr04jxmwmvln"
+
+[sub_resource type="Curve" id="Curve_cegan"]
+_data = [Vector2(0, 0), 0.0, 1.0, 0, 1, Vector2(1, 1), 1.0, 0.0, 1, 0]
+point_count = 2
+
+[sub_resource type="Resource" id="Resource_82xsv"]
+script = ExtResource("4_2cqfq")
+half_size = Vector2(2, 2)
+curve = SubResource("Curve_cegan")
+metadata/_custom_type_script = "uid://b640bmyfflwr3"
 
 [sub_resource type="Resource" id="Resource_ycdy4"]
 script = ExtResource("5_efxa6")
@@ -62,6 +76,30 @@ sky = SubResource("Sky_5vw27")
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_efxa6"]
 frequency = 0.0341
 
+[sub_resource type="Curve" id="Curve_82xsv"]
+_data = [Vector2(0, 0), 0.0, 1.0, 0, 1, Vector2(1, 1), 1.0, 0.0, 1, 0]
+point_count = 2
+
+[sub_resource type="Curve" id="Curve_074og"]
+_data = [Vector2(0, 0), 0.0, 3.514608, 0, 0, Vector2(1, 1), 0.1164741, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Curve" id="Curve_d13ii"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 1, Vector2(1, 1), 0.0, 0.0, 1, 0]
+point_count = 2
+
+[sub_resource type="Curve" id="Curve_getpj"]
+_data = [Vector2(0, 0), 0.0, 1.0, 0, 1, Vector2(1, 1), 1.0, 0.0, 1, 0]
+point_count = 2
+
+[sub_resource type="Curve" id="Curve_ryguw"]
+_data = [Vector2(0, 0), 0.0, 3.514608, 0, 0, Vector2(1, 1), 0.1164741, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Curve" id="Curve_1u8w0"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 1, Vector2(1, 1), 0.0, 0.0, 1, 0]
+point_count = 2
+
 [node name="Main" type="Node3D"]
 
 [node name="TerrainRender" type="Node3D" parent="." node_paths=PackedStringArray("terrain_manager")]
@@ -80,11 +118,14 @@ follow = NodePath("../CameraTarget")
 camera = NodePath("../Camera3D")
 phantom_camera = NodePath("../PhantomCamera3D")
 terrain_manager = NodePath("../TerrainManager")
-terrain_brush = SubResource("Resource_dg77c")
+terrain_brush_circle = SubResource("Resource_074og")
+terrain_brush_rectangle = SubResource("Resource_82xsv")
 orbit_camera = SubResource("Resource_ycdy4")
 brush_types_tool = SubResource("Resource_vivmo")
 brush_heights_tool = SubResource("Resource_2cqfq")
-test_material = ExtResource("8_vivmo")
+terrain_material = ExtResource("2_w48qg")
+terrain_brush_circle_material = ExtResource("8_vivmo")
+terrain_brush_rectangle_material = ExtResource("10_074og")
 
 [node name="PhantomCamera3D" type="Node3D" parent="." node_paths=PackedStringArray("follow_target")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5730832, 5.59)
@@ -140,28 +181,64 @@ offset_top = 12.0
 offset_right = 189.0
 offset_bottom = 52.0
 
-[node name="Orbit" type="Button" parent="Control/HBoxContainer" node_paths=PackedStringArray("editor_controller")]
+[node name="Orbit" type="Button" parent="Control/HBoxContainer"]
 layout_mode = 2
 toggle_mode = true
 text = "Orbit"
 script = ExtResource("14_w48qg")
-editor_controller = NodePath("../../../EditorController")
 
-[node name="Types" type="Button" parent="Control/HBoxContainer" node_paths=PackedStringArray("editor_controller")]
+[node name="Types" type="Button" parent="Control/HBoxContainer"]
 layout_mode = 2
 toggle_mode = true
 text = "Types"
 script = ExtResource("14_w48qg")
 tool = 1
-editor_controller = NodePath("../../../EditorController")
 
-[node name="Heights" type="Button" parent="Control/HBoxContainer" node_paths=PackedStringArray("editor_controller")]
+[node name="Heights" type="Button" parent="Control/HBoxContainer"]
 layout_mode = 2
 toggle_mode = true
 text = "Heights"
 script = ExtResource("14_w48qg")
 tool = 2
-editor_controller = NodePath("../../../EditorController")
+
+[node name="VSeparator" type="VSeparator" parent="Control/HBoxContainer"]
+layout_mode = 2
+
+[node name="Soft Circle" type="Button" parent="Control/HBoxContainer"]
+layout_mode = 2
+text = "Soft Circle"
+script = ExtResource("16_2cqfq")
+curve = SubResource("Curve_82xsv")
+
+[node name="Harsh Circle" type="Button" parent="Control/HBoxContainer"]
+layout_mode = 2
+text = "Harsh Circle"
+script = ExtResource("16_2cqfq")
+curve = SubResource("Curve_074og")
+
+[node name="Hard Circle" type="Button" parent="Control/HBoxContainer"]
+layout_mode = 2
+text = "Hard Circle"
+script = ExtResource("16_2cqfq")
+curve = SubResource("Curve_d13ii")
+
+[node name="Soft Box" type="Button" parent="Control/HBoxContainer"]
+layout_mode = 2
+text = "Soft Box"
+script = ExtResource("19_cegan")
+curve = SubResource("Curve_getpj")
+
+[node name="Harsh Box" type="Button" parent="Control/HBoxContainer"]
+layout_mode = 2
+text = "Harsh Box"
+script = ExtResource("19_cegan")
+curve = SubResource("Curve_ryguw")
+
+[node name="Hard Box" type="Button" parent="Control/HBoxContainer"]
+layout_mode = 2
+text = "Hard Box"
+script = ExtResource("19_cegan")
+curve = SubResource("Curve_1u8w0")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 3.7993758, 0.05845642)

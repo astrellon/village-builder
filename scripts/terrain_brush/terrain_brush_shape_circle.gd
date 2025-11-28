@@ -16,6 +16,16 @@ func create_curve_values() -> PackedFloat32Array:
 	
 	return result
 
+func update_curve(new_curve: Curve) -> void:
+	if self.curve != new_curve:
+		self.curve = new_curve
+		self.on_change.emit()
+
+func update_radius(new_radius: float) -> void:
+	if self.radius != new_radius:
+		self.radius = new_radius
+		self.on_change.emit()
+
 func size() -> Vector3:
 	return Vector3(self.radius * 2.0, 0.0, self.radius * 2.0)
 

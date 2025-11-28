@@ -1,0 +1,7 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://lfi88l8g8hb0"]
+
+[ext_resource type="Shader" uid="uid://jmbv8q55eusn" path="res://materials/terrain_rectangle_shape.gdshader" id="1_2cdyt"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_2cdyt")
