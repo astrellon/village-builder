@@ -5,6 +5,17 @@ class_name TerrainBrushShapeCircle
 @export var radius: float = 1.0
 @export var curve: Curve = Curve.new()
 
+func create_curve_values() -> PackedFloat32Array:
+	const length := 32
+	var result := PackedFloat32Array()
+	result.resize(length)
+	
+	var step = 1.0 / float(length)
+	for i in range(length):
+		result[i] = self.curve.sample(i * step)
+	
+	return result
+
 func size() -> Vector3:
 	return Vector3(self.radius * 2.0, 0.0, self.radius * 2.0)
 

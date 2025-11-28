@@ -18,9 +18,17 @@ enum EditorToolType { Orbit, Types, Heights }
 @export var brush_types_tool: EditorBrushTypes
 @export var brush_heights_tool: EditorBrushHeights
 
+@export var test_material: ShaderMaterial
+
 var _current_tool: EditorTool
 var is_shift_down := false
 var locked_orbit := false
+
+func _ready() -> void:
+	if self.terrain_brush is TerrainBrushShapeCircle:
+		var curve_values = self.terrain_brush.create_curve_values()
+		self.test_material.set_shader_parameter('curve_values', curve_values)
+		self.test_material.set_shader_parameter('radius', self.terrain_brush.radius)
 
 func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("debug_draw"):
@@ -72,6 +80,12 @@ func _input(event: InputEvent):
 				self._current_tool.process_input(self, event)
 		else:
 			self.locked_orbit = true
+	
+	if event is InputEventMouseMotion:
+		var result := self.do_mouse_raycast(event)
+		if result.has('position'):
+			var target_pos: Vector3 = result['position']
+			self.test_material.set_shader_parameter('target_pos', target_pos)
 	
 	#if event is InputEventMouseButton and event.pressed:
 		#var height_change := 0.0

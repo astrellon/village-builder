@@ -72,7 +72,7 @@ func brush_types(local_pos: Vector3, shape: TerrainBrushShape, type: int, type_m
 			
 			var center_point := Vector3(x + 0.5, average_height, z + 0.5)
 			var diff = shape.evaluate(local_pos, center_point)
-			if diff > 0.001:
+			if diff > 0.25:
 				var new_type := change_type(types, type, type_mask)
 				if new_type != types:
 					has_change = true

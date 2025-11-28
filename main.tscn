@@ -1,7 +1,7 @@
-[gd_scene load_steps=28 format=3 uid="uid://l388sbifpguy"]
+[gd_scene load_steps=29 format=3 uid="uid://l388sbifpguy"]
 
 [ext_resource type="Script" uid="uid://dkmvsng6gd63s" path="res://scripts/terrain_render.gd" id="1_lquwl"]
-[ext_resource type="Material" uid="uid://b6fquxhbgv26p" path="res://terrain_tileset.tres" id="2_4c57u"]
+[ext_resource type="Material" uid="uid://bex41odk5pf6u" path="res://materials/terrain_material.tres" id="2_w48qg"]
 [ext_resource type="Script" uid="uid://cmn1kiv4rybeu" path="res://scripts/editor_controller.gd" id="4_1bvp3"]
 [ext_resource type="Script" uid="uid://dcr04jxmwmvln" path="res://scripts/terrain_brush_shape_circle.gd" id="4_4c57u"]
 [ext_resource type="Script" uid="uid://sjr8ynqsa5aj" path="res://scripts/editor_tools/editor_camera_orbit.gd" id="5_efxa6"]
@@ -11,13 +11,14 @@
 [ext_resource type="Script" uid="uid://dbnltenqsar27" path="res://scripts/editor_tools/editor_brush_heights.gd" id="7_w48qg"]
 [ext_resource type="Script" uid="uid://b8hhnqsugykly" path="res://addons/phantom_camera/scripts/resources/camera_3d_resource.gd" id="8_5vw27"]
 [ext_resource type="Script" uid="uid://bd046eokvcnu2" path="res://addons/phantom_camera/scripts/phantom_camera_host/phantom_camera_host.gd" id="8_kek77"]
+[ext_resource type="Material" uid="uid://d24h4abx6plu0" path="res://materials/terrain_circle_shape.tres" id="8_vivmo"]
 [ext_resource type="Script" uid="uid://dus7cqshingla" path="res://scripts/camera_target.gd" id="9_kek77"]
 [ext_resource type="Script" uid="uid://vv2knc54s0o7" path="res://scripts/terrain_manager.gd" id="10_4c57u"]
 [ext_resource type="Script" uid="uid://cn7ma8c5m8vhw" path="res://scripts/editor_ui/change_editor_tool.gd" id="14_w48qg"]
 
 [sub_resource type="Curve" id="Curve_efxa6"]
-_data = [Vector2(0, 0.5), 0.0, 0.0, 0, 1, Vector2(1, 0.5), 0.0, 0.0, 1, 0]
-point_count = 2
+_data = [Vector2(0, 1), 0.0, -4.8888893, 0, 1, Vector2(0.20454545, 0), 0.0732419, 0.0732419, 0, 0, Vector2(0.8011364, 0), 0.0, 0.0, 0, 0, Vector2(1, 1), 5.028572, 0.0, 1, 0]
+point_count = 4
 
 [sub_resource type="Resource" id="Resource_dg77c"]
 script = ExtResource("4_4c57u")
@@ -65,7 +66,7 @@ frequency = 0.0341
 
 [node name="TerrainRender" type="Node3D" parent="." node_paths=PackedStringArray("terrain_manager")]
 script = ExtResource("1_lquwl")
-material = ExtResource("2_4c57u")
+material = ExtResource("2_w48qg")
 terrain_manager = NodePath("../TerrainManager")
 metadata/_custom_type_script = "uid://dkmvsng6gd63s"
 
@@ -83,6 +84,7 @@ terrain_brush = SubResource("Resource_dg77c")
 orbit_camera = SubResource("Resource_ycdy4")
 brush_types_tool = SubResource("Resource_vivmo")
 brush_heights_tool = SubResource("Resource_2cqfq")
+test_material = ExtResource("8_vivmo")
 
 [node name="PhantomCamera3D" type="Node3D" parent="." node_paths=PackedStringArray("follow_target")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5730832, 5.59)
@@ -160,3 +162,8 @@ text = "Heights"
 script = ExtResource("14_w48qg")
 tool = 2
 editor_controller = NodePath("../../../EditorController")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 3.7993758, 0.05845642)
+material_override = ExtResource("2_w48qg")
+material_overlay = ExtResource("8_vivmo")

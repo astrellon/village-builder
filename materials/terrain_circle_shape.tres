@@ -1,0 +1,10 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://d24h4abx6plu0"]
+
+[ext_resource type="Shader" uid="uid://bjpxvcmhuik15" path="res://materials/terrain_circle_shape.gdshader" id="1_1qmxv"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_1qmxv")
+shader_parameter/target_pos = Vector3(0.07, 1.965, -0.08)
+shader_parameter/radius = 2.0
+shader_parameter/curve_values = PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)

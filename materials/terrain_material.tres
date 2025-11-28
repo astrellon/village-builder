@@ -1,0 +1,9 @@
+[gd_resource type="StandardMaterial3D" load_steps=3 format=3 uid="uid://bex41odk5pf6u"]
+
+[ext_resource type="Texture2D" uid="uid://b3vuef37o3int" path="res://textures/textureAtlas.png" id="1_a5vyf"]
+[ext_resource type="Material" uid="uid://d24h4abx6plu0" path="res://materials/terrain_circle_shape.tres" id="2_tjm3o"]
+
+[resource]
+next_pass = ExtResource("2_tjm3o")
+albedo_texture = ExtResource("1_a5vyf")
+texture_filter = 2
