@@ -6,7 +6,8 @@ var _debug_draw_toggled = false
 
 var test_ball = preload("res://test_ball.tscn")
 
-enum EditorToolType { Orbit, Types, Heights }
+enum ToolType { Orbit, Types, Heights }
+enum ParameterType { Unknown, Radius, BoxSizeX, BoxSizeY }
 
 @export var follow: Node3D
 @export var camera: Camera3D
@@ -85,12 +86,12 @@ func do_mouse_raycast(event: InputEventMouse) -> Dictionary:
 	var result := space_state.intersect_ray(query)
 	return result
 
-func change_tool(tool: EditorToolType) -> void:
-	if tool == EditorToolType.Orbit:
+func change_tool(tool: ToolType) -> void:
+	if tool == ToolType.Orbit:
 		self._current_tool = self.orbit_camera
-	elif tool == EditorToolType.Types:
+	elif tool == ToolType.Types:
 		self._current_tool = self.brush_types_tool
-	elif tool == EditorToolType.Heights:
+	elif tool == ToolType.Heights:
 		self._current_tool = self.brush_heights_tool
 
 func change_terrain_shape(shape: TerrainBrushShape) -> void:
@@ -104,6 +105,19 @@ func change_terrain_shape(shape: TerrainBrushShape) -> void:
 		self.on_shape_change()
 		self.terrain_brush.on_change.connect(self.on_shape_change)
 
+func get_parameter(param: ParameterType) -> float:
+	match param:
+		ParameterType.Radius: return self.terrain_brush_circle.radius
+		ParameterType.BoxSizeX: return self.terrain_brush_rectangle.half_size.x
+		ParameterType.BoxSizeY: return self.terrain_brush_rectangle.half_size.y
+		_: return 0.0
+
+func set_parameter(param: ParameterType, value: float) -> void:
+	match param:
+		ParameterType.Radius: self.terrain_brush_circle.update_radius(value)
+		ParameterType.BoxSizeX: self.terrain_brush_rectangle.update_half_size(Vector2(value, self.terrain_brush_rectangle.half_size.y))
+		ParameterType.BoxSizeY: self.terrain_brush_rectangle.update_half_size(Vector2(self.terrain_brush_rectangle.half_size.x, value))
+
 func on_shape_change() -> void:
 	if self.terrain_brush is TerrainBrushShapeCircle:
 		self.terrain_material.next_pass = self.terrain_brush_circle_material
@@ -115,7 +129,7 @@ func on_shape_change() -> void:
 		self.terrain_material.next_pass = self.terrain_brush_rectangle_material
 		var curve_values = self.terrain_brush.create_curve_values()
 		self.terrain_brush_rectangle_material.set_shader_parameter('curve_values', curve_values)
-		self.terrain_brush_rectangle_material.set_shader_parameter('hals_size', self.terrain_brush.half_size)
+		self.terrain_brush_rectangle_material.set_shader_parameter('half_size', self.terrain_brush.half_size)
 	
 	else:
 		self.terrain_material.next_pass = null

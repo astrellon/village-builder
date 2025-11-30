@@ -1,4 +1,4 @@
-[gd_scene load_steps=41 format=3 uid="uid://l388sbifpguy"]
+[gd_scene load_steps=42 format=3 uid="uid://l388sbifpguy"]
 
 [ext_resource type="Script" uid="uid://dkmvsng6gd63s" path="res://scripts/terrain_render.gd" id="1_lquwl"]
 [ext_resource type="Material" uid="uid://bex41odk5pf6u" path="res://materials/terrain_material.tres" id="2_w48qg"]
@@ -19,6 +19,7 @@
 [ext_resource type="Script" uid="uid://cn7ma8c5m8vhw" path="res://scripts/editor_ui/change_editor_tool.gd" id="14_w48qg"]
 [ext_resource type="Script" uid="uid://dys4uf87b5u7r" path="res://scripts/editor_ui/change_brush_circle_shape.gd" id="16_2cqfq"]
 [ext_resource type="Script" uid="uid://b5htcmblb0woe" path="res://scripts/editor_ui/change_brush_rectangle_shape.gd" id="19_cegan"]
+[ext_resource type="PackedScene" uid="uid://dgya1103qm1cx" path="res://scenes/editor_ui/editor_label.tscn" id="20_82xsv"]
 
 [sub_resource type="Curve" id="Curve_yaehf"]
 _data = [Vector2(0, 0), 0.0, 1.0, 0, 1, Vector2(1, 1), 1.0, 0.0, 1, 0]
@@ -240,7 +241,37 @@ text = "Hard Box"
 script = ExtResource("19_cegan")
 curve = SubResource("Curve_1u8w0")
 
+[node name="VSeparator2" type="VSeparator" parent="Control/HBoxContainer"]
+layout_mode = 2
+
+[node name="CircleParams" type="HBoxContainer" parent="Control/HBoxContainer"]
+layout_mode = 2
+
+[node name="Radius" parent="Control/HBoxContainer/CircleParams" instance=ExtResource("20_82xsv")]
+layout_mode = 2
+
+[node name="BoxParams" type="HBoxContainer" parent="Control/HBoxContainer"]
+layout_mode = 2
+
+[node name="SizeX" parent="Control/HBoxContainer/BoxParams" instance=ExtResource("20_82xsv")]
+layout_mode = 2
+parameter = 2
+
+[node name="Label" parent="Control/HBoxContainer/BoxParams/SizeX" index="0"]
+text = "Size X:"
+
+[node name="SizeY" parent="Control/HBoxContainer/BoxParams" instance=ExtResource("20_82xsv")]
+layout_mode = 2
+parameter = 3
+
+[node name="Label" parent="Control/HBoxContainer/BoxParams/SizeY" index="0"]
+text = "Size Y:"
+
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 3.7993758, 0.05845642)
 material_override = ExtResource("2_w48qg")
 material_overlay = ExtResource("8_vivmo")
+
+[editable path="Control/HBoxContainer/CircleParams/Radius"]
+[editable path="Control/HBoxContainer/BoxParams/SizeX"]
+[editable path="Control/HBoxContainer/BoxParams/SizeY"]

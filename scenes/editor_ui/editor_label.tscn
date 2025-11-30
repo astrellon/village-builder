@@ -1,0 +1,19 @@
+[gd_scene load_steps=2 format=3 uid="uid://dgya1103qm1cx"]
+
+[ext_resource type="Script" uid="uid://ls0oqv25i2li" path="res://scripts/editor_ui/editor_slider.gd" id="1_tgias"]
+
+[node name="EditorLabel" type="VBoxContainer" node_paths=PackedStringArray("slider", "label")]
+script = ExtResource("1_tgias")
+slider = NodePath("HSlider")
+label = NodePath("Label")
+parameter = 1
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+text = "Radius:"
+
+[node name="HSlider" type="HSlider" parent="."]
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+max_value = 20.0
+step = 0.1
