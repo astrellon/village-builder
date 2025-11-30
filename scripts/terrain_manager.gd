@@ -8,15 +8,22 @@ class_name TerrainManager
 
 var terrain_data: TerrainData
 var has_terrain_data = false
+var _height_map_data := PackedByteArray()
+var _height_map_size := Vector2i.ZERO
 
 func calc_height_at(x: float, y: float) -> float:
 	#var heightx = x * 0.5 - 2
 	#var heighty = y * 0.5 - 2
 	#return clampf(max(heightx, heighty), 0, 1)
 	#@warning_ignore("narrowing_conversion")
-	#var colour = self.height_map.get_pixel(x * 2, y * 2)
-	#return colour.r * 5.0
-	return self.noise.get_noise_2d(x, y) * 4.0
+	var ix := int(x * 2)
+	var iy := int(y * 2)
+	ix = ix % (self._height_map_size.x / 2)
+	iy = iy % (self._height_map_size.y / 2)
+	var index = ix + iy * self._height_map_size.x
+	var red = self._height_map_data[index * 4]
+	return (red / 255.0) * 5.0
+	#return self.noise.get_noise_2d(x, y) * 4.0
 
 func create_terrain_chunk(size: int, position: Vector3i) -> TerrainChunkData:
 	var types := PackedInt64Array()
@@ -66,7 +73,8 @@ func create_terrain() -> TerrainData:
 	return TerrainData.new(size, chunks)
 
 func _ready() -> void:
-	
+	self._height_map_data = self.height_map.get_data()
+	self._height_map_size = self.height_map.get_size()
 	var before_memory = Performance.get_monitor(Performance.MEMORY_STATIC)
 	var before = Time.get_ticks_usec()
 	self.terrain_data = self.create_terrain()

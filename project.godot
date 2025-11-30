@@ -42,6 +42,10 @@ spawn_ball={
 ]
 }
 
+[physics]
+
+3d/physics_engine="Jolt Physics"
+
 [rendering]
 
 anti_aliasing/quality/screen_space_aa=2

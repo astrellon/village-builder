@@ -1,4 +1,4 @@
-[gd_scene load_steps=42 format=3 uid="uid://l388sbifpguy"]
+[gd_scene load_steps=43 format=3 uid="uid://l388sbifpguy"]
 
 [ext_resource type="Script" uid="uid://dkmvsng6gd63s" path="res://scripts/terrain_render.gd" id="1_lquwl"]
 [ext_resource type="Material" uid="uid://bex41odk5pf6u" path="res://materials/terrain_material.tres" id="2_w48qg"]
@@ -18,6 +18,7 @@
 [ext_resource type="Material" uid="uid://lfi88l8g8hb0" path="res://materials/terrain_rectangle_shape.tres" id="10_074og"]
 [ext_resource type="Script" uid="uid://cn7ma8c5m8vhw" path="res://scripts/editor_ui/change_editor_tool.gd" id="14_w48qg"]
 [ext_resource type="Script" uid="uid://dys4uf87b5u7r" path="res://scripts/editor_ui/change_brush_circle_shape.gd" id="16_2cqfq"]
+[ext_resource type="Image" uid="uid://7iyv1pu0256d" path="res://textures/test-level2.png" id="17_getpj"]
 [ext_resource type="Script" uid="uid://b5htcmblb0woe" path="res://scripts/editor_ui/change_brush_rectangle_shape.gd" id="19_cegan"]
 [ext_resource type="PackedScene" uid="uid://dgya1103qm1cx" path="res://scenes/editor_ui/editor_label.tscn" id="20_82xsv"]
 
@@ -167,6 +168,7 @@ skeleton = NodePath("../..")
 
 [node name="TerrainManager" type="Node" parent="."]
 script = ExtResource("10_4c57u")
+height_map = ExtResource("17_getpj")
 noise = SubResource("FastNoiseLite_efxa6")
 
 [node name="Control" type="Control" parent="."]
